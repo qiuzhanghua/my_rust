@@ -4,6 +4,7 @@ use r2d2_mysql;
 use r2d2_mysql::mysql::{Opts, OptsBuilder};
 use r2d2_mysql::MysqlConnectionManager;
 use std::sync::Arc;
+use mysql::from_row;
 
 #[derive(Debug, PartialEq, Eq)]
 struct Payment {
@@ -21,6 +22,11 @@ fn main() {
     let manager = MysqlConnectionManager::new(builder);
     let pool = Arc::new(r2d2::Pool::builder().max_size(4).build(manager).unwrap());
     let mut conn = pool.clone().get().unwrap();
-    let x = conn.query(r#"select version() v"#);
-    println!("{:?}", x.unwrap().last());
+
+    let x = conn.query(r#"select 4.1 x, version() v"#);
+    // println!("{:?}", x.unwrap().last());
+    for row in x.unwrap() {
+        let (i, y) = from_row::<(f64, String)>(row.unwrap());
+        println!("{:?}, {:?}", i, y);
+    }
 }
