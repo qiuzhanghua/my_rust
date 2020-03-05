@@ -8,9 +8,20 @@ use std::error::Error;
 use std::result;
 use std::sync::Arc;
 
+/*
+create table people
+(
+	id bigint auto_increment,
+	name varchar(80) not null,
+	email varchar(128) not null,
+	enabled boolean default false null,
+	constraint people_pk
+		primary key (id)
+);
+*/
 #[derive(Debug, PartialEq, Eq)]
 pub struct Person {
-    id: u64,
+    id: i64,
     name: String,
     email: String,
     enabled: Option<bool>,
@@ -105,14 +116,14 @@ pub fn query_data(
     sql: &str,
     name: &str,
     enabled: bool,
-    limit: u64,
-    offset: u64,
-) -> result::Result<Vec<(u64, String, String, Option<bool>)>, Box<dyn Error>> {
+    limit: i64,
+    offset: i64,
+) -> result::Result<Vec<(i64, String, String, Option<bool>)>, Box<dyn Error>> {
     let mut stmt = conn.prepare(sql)?;
     let qr = stmt.execute((name, enabled, limit, offset))?;
-    let mut data = Vec::<(u64, String, String, Option<bool>)>::new();
+    let mut data = Vec::<(i64, String, String, Option<bool>)>::new();
     for row in qr {
-        let r = from_row::<(u64, String, String, Option<bool>)>(row.unwrap());
+        let r = from_row::<(i64, String, String, Option<bool>)>(row.unwrap());
         data.push(r);
     }
     Ok(data)
@@ -123,8 +134,8 @@ pub fn query_data_2(
     sql: &str,
     name: &str,
     enabled: bool,
-    limit: u64,
-    offset: u64,
+    limit: i64,
+    offset: i64,
 ) -> result::Result<Vec<Person>, Box<dyn Error>> {
     let x = conn
         .prep_exec(
@@ -141,7 +152,7 @@ pub fn query_data_2(
                 .map(|row_result| row_result.unwrap())
                 .map(|row| {
                     let (id, name, email, enabled) =
-                        from_row::<(u64, String, String, Option<bool>)>(row);
+                        from_row::<(i64, String, String, Option<bool>)>(row);
                     Person {
                         id,
                         name,
